@@ -17,3 +17,5 @@ C- Advanced Level
 11- Find the top 3 most-viewed tracks for each artist using window functions.
 12- Write a query to find tracks where the liveness score is above the average.
 13- Use a WITH clause to calculate the difference between the highest and lowest energy values for tracks in each album.
+14- Find tracks where the energy-to-liveness ratio is greater than 1.2.
+15- Calculate the cumulative sum of likes for tracks ordered by the number of views, using window functions.
