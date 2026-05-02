@@ -1,0 +1,124 @@
+
+# Create ArtAlbums database
+bash
+
+
+# Create database and table
+sudo -u postgres psql << 'EOF'
+DROP DATABASE IF EXISTS artalbums;
+CREATE DATABASE artalbums;
+EOF
+echo "Database created"
+
+--------------
+Create spotify table in ArtAlbums database
+bash
+
+
+# Create the spotify table
+su postgres -c "psql -d artalbums" << 'EOF'
+DROP TABLE IF EXISTS spotify;
+CREATE TABLE spotify (
+    id SERIAL PRIMARY KEY,
+    artist VARCHAR(255),
+    track VARCHAR(255),
+    album VARCHAR(255),
+    album_type VARCHAR(50),
+    danceability FLOAT,
+    energy FLOAT,
+    loudness FLOAT,
+    speechiness FLOAT,
+    acousticness FLOAT,
+    instrumentalness FLOAT,
+    liveness FLOAT,
+    valence FLOAT,
+    tempo FLOAT,
+    duration_min FLOAT,
+    title VARCHAR(255),
+    channel VARCHAR(255),
+    views FLOAT,
+    likes BIGINT,
+    comments BIGINT,
+    licensed BOOLEAN,
+    official_video BOOLEAN,
+    stream BIGINT,
+    energy_liveness FLOAT,
+    most_played_on VARCHAR(50)
+);
+\d spotify
+EOF
+
+-------------------
+# Data Validation 
+echo '--- [1] Total Row Count ---'
+SELECT COUNT(*) AS total_rows FROM spotify;
+
+\echo ''
+\echo '--- [2] Duplicate Tracks (same artist + track) ---'
+SELECT artist, track, COUNT(*) AS duplicate_count
+FROM spotify
+GROUP BY artist, track
+HAVING COUNT(*) > 1
+ORDER BY duplicate_count DESC;
+
+\echo ''
+\echo '--- [3] NULL / Missing Values per Column ---'
+SELECT
+  SUM(CASE WHEN artist IS NULL THEN 1 ELSE 0 END)           AS null_artist,
+  SUM(CASE WHEN track IS NULL THEN 1 ELSE 0 END)            AS null_track,
+  SUM(CASE WHEN album IS NULL THEN 1 ELSE 0 END)            AS null_album,
+  SUM(CASE WHEN album_type IS NULL THEN 1 ELSE 0 END)       AS null_album_type,
+  SUM(CASE WHEN danceability IS NULL THEN 1 ELSE 0 END)     AS null_danceability,
+  SUM(CASE WHEN energy IS NULL THEN 1 ELSE 0 END)           AS null_energy,
+  SUM(CASE WHEN stream IS NULL THEN 1 ELSE 0 END)           AS null_stream,
+  SUM(CASE WHEN views IS NULL THEN 1 ELSE 0 END)            AS null_views,
+  SUM(CASE WHEN likes IS NULL THEN 1 ELSE 0 END)            AS null_likes,
+  SUM(CASE WHEN licensed IS NULL THEN 1 ELSE 0 END)         AS null_licensed,
+  SUM(CASE WHEN official_video IS NULL THEN 1 ELSE 0 END)   AS null_official_video
+FROM spotify;
+
+\echo ''
+\echo '--- [4] Data Range / Consistency Checks ---'
+SELECT
+  MIN(danceability) AS min_dance, MAX(danceability) AS max_dance,
+  MIN(energy)       AS min_energy, MAX(energy) AS max_energy,
+  MIN(loudness)     AS min_loud,  MAX(loudness) AS max_loud,
+  MIN(liveness)     AS min_live,  MAX(liveness) AS max_live,
+  MIN(tempo)        AS min_tempo, MAX(tempo) AS max_tempo,
+  MIN(duration_min) AS min_dur,   MAX(duration_min) AS max_dur
+FROM spotify;
+
+\echo ''
+\echo '--- [5] Invalid album_type values ---'
+SELECT album_type, COUNT(*) AS cnt
+FROM spotify
+WHERE album_type NOT IN ('album','single','compilation')
+GROUP BY album_type;
+
+\echo ''
+\echo '--- [6] Invalid most_played_on values ---'
+SELECT most_played_on, COUNT(*) AS cnt
+FROM spotify
+WHERE most_played_on NOT IN ('Spotify','Youtube')
+GROUP BY most_played_on;
+
+\echo ''
+\echo '--- [7] Negative or Zero streams (invalid) ---'
+SELECT COUNT(*) AS invalid_streams FROM spotify WHERE stream <= 0;
+
+\echo ''
+\echo '--- [8] Consistency: energy_liveness vs calculated ratio ---'
+SELECT COUNT(*) AS inconsistent_ratio
+FROM spotify
+WHERE ABS(energy_liveness - ROUND((energy/NULLIF(liveness,0))::numeric, 4)) > 0.01;
+
+\echo ''
+\echo '--- [9] Distribution: album_type ---'
+SELECT album_type, COUNT(*) AS cnt FROM spotify GROUP BY album_type ORDER BY cnt DESC;
+
+\echo ''
+\echo '--- [10] Distribution: most_played_on ---'
+SELECT most_played_on, COUNT(*) AS cnt FROM spotify GROUP BY most_played_on;
+
+EOF
+Output
