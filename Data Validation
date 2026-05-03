@@ -121,4 +121,4 @@ SELECT album_type, COUNT(*) AS cnt FROM spotify GROUP BY album_type ORDER BY cnt
 SELECT most_played_on, COUNT(*) AS cnt FROM spotify GROUP BY most_played_on;
 
 EOF
-Output
+
