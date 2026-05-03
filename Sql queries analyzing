@@ -1,0 +1,57 @@
+
+\echo '============================================================'
+\echo '  QUERY 1: Tracks with more than 1 billion streams'
+\echo '============================================================'
+SELECT track, artist, stream
+FROM spotify
+WHERE stream > 1000000000
+ORDER BY stream DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, stream FROM spotify 
+WHERE stream > 1000000000 ORDER BY stream DESC;
+
+
+\echo '============================================================'
+\echo '  QUERY 2: All albums with their respective artists'
+\echo '============================================================'
+SELECT DISTINCT album, artist
+FROM spotify
+ORDER BY artist, album;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT DISTINCT album, artist FROM spotify ORDER BY artist, album;
+
+
+
+\echo '============================================================'
+\echo '  QUERY 3: Total comments for tracks where licensed = TRUE'
+\echo '============================================================'
+SELECT SUM(comments) AS total_comments_licensed
+FROM spotify
+WHERE licensed = TRUE;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT SUM(comments) AS total_comments_licensed FROM spotify 
+WHERE licensed = TRUE;
+
+\echo ''
+\echo '============================================================'
+\echo '  QUERY 4: Tracks belonging to album_type = single'
+\echo '============================================================'
+SELECT track, artist, album
+FROM spotify
+WHERE album_type = 'single'
+ORDER BY artist, track;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, album FROM spotify 
+WHERE album_type = 'single' ORDER BY artist, track;
