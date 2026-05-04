@@ -274,3 +274,15 @@ SELECT track, artist, views, likes,
 FROM spotify
 ORDER BY views ASC;
 
+Query Highlights
+15 tracks have >1B streams (led by montero at 4.77B)
+33 distinct artist-album combinations
+55,913,428 total comments on licensed tracks
+33 singles in the dataset
+Ed Sheeran leads with 16 tracks
+7 Rings EP has highest avg danceability (0.94)
+Nonstop (Bad Bunny) tops energy at 0.99
+45 tracks have official videos
+Billie Eilish — When We All Fall Asleep tops total album views (14.6B)
+51 tracks are most played on Spotify 11–15: Window functions (RANK, SUM, AVG) executed correctly with full outputs
+
