@@ -55,3 +55,33 @@ ORDER BY artist, track;
 EXPLAIN ANALYZE
 SELECT track, artist, album FROM spotify 
 WHERE album_type = 'single' ORDER BY artist, track;
+
+
+\echo '============================================================'
+\echo '  QUERY 5: Total number of tracks by each artist'
+\echo '============================================================'
+SELECT artist, COUNT(*) AS total_tracks
+FROM spotify
+GROUP BY artist
+ORDER BY total_tracks DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT artist, COUNT(*) AS total_tracks FROM spotify 
+GROUP BY artist ORDER BY total_tracks DESC;
+
+\echo ''
+\echo '============================================================'
+\echo '  QUERY 6: Average danceability per album'
+\echo '============================================================'
+SELECT album, artist, ROUND(AVG(danceability)::numeric, 4) AS avg_danceability
+FROM spotify
+GROUP BY album, artist
+ORDER BY avg_danceability DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT album, artist, ROUND(AVG(danceability)::numeric,4) AS avg_danceability
+FROM spotify GROUP BY album, artist ORDER BY avg_danceability DESC;
