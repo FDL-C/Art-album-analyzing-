@@ -120,5 +120,16 @@ SELECT album_type, COUNT(*) AS cnt FROM spotify GROUP BY album_type ORDER BY cnt
 \echo '--- [10] Distribution: most_played_on ---'
 SELECT most_played_on, COUNT(*) AS cnt FROM spotify GROUP BY most_played_on;
 
-EOF
+
+Data Validation Results
+Check	Result
+Total rows	✅ 100
+Duplicate tracks	✅ 0 duplicates
+NULL values (all columns)	✅ 0 nulls
+album_type values	✅ Only valid: album/single/compilation
+most_played_on values	✅ Only Spotify/Youtube
+Negative or zero streams	✅ None
+energy_liveness consistency	✅ All ratios match
+Value ranges	✅ All within valid bounds
+
 
