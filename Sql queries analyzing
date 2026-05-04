@@ -139,5 +139,99 @@ ORDER BY stream DESC;
 \echo ''
 \echo '--- EXPLAIN ANALYZE ---'
 EXPLAIN ANALYZE
-SELECT track, artist, most_played_on, stream FROM spotify WHERE most_played_on = 'Spotify' ORDER BY stream DESC;
+SELECT track, artist, most_played_on, stream FROM spotify
+WHERE most_played_on = 'Spotify' ORDER BY stream DESC;
+
+============================================================'
+\echo '  QUERY 11: Top 3 most-viewed tracks per artist (WINDOW)'
+\echo '============================================================'
+SELECT artist, track, views, rank
+FROM (
+    SELECT
+        artist,
+        track,
+        views,
+        RANK() OVER (PARTITION BY artist ORDER BY views DESC) AS rank
+    FROM spotify
+) ranked
+WHERE rank <= 3
+ORDER BY artist, rank;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT artist, track, views, rank FROM (
+    SELECT artist, track, views,
+           RANK() OVER (PARTITION BY artist ORDER BY views DESC) AS rank
+    FROM spotify
+) ranked WHERE rank <= 3 ORDER BY artist, rank;
+
+\echo ''
+\echo '============================================================'
+\echo '  QUERY 12: Tracks where liveness > average liveness'
+\echo '============================================================'
+SELECT track, artist, ROUND(liveness::numeric,4) AS liveness,
+       ROUND(AVG(liveness) OVER()::numeric,4) AS avg_liveness
+FROM spotify
+WHERE liveness > (SELECT AVG(liveness) FROM spotify)
+ORDER BY liveness DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, liveness FROM spotify
+WHERE liveness > (SELECT AVG(liveness) FROM spotify)
+ORDER BY liveness DESC;
+
+
+============================================================'
+\echo '  QUERY 13: WITH clause — highest vs lowest energy per album'
+\echo '============================================================'
+WITH energy_stats AS (
+    SELECT
+        album,
+        artist,
+        MAX(energy) AS max_energy,
+        MIN(energy) AS min_energy,
+        ROUND((MAX(energy) - MIN(energy))::numeric, 4) AS energy_range
+    FROM spotify
+    GROUP BY album, artist
+)
+SELECT album, artist,
+       ROUND(max_energy::numeric,4) AS max_energy,
+       ROUND(min_energy::numeric,4) AS min_energy,
+       energy_range
+FROM energy_stats
+ORDER BY energy_range DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+WITH energy_stats AS (
+    SELECT album, artist, MAX(energy) AS max_energy, MIN(energy) AS min_energy,
+           ROUND((MAX(energy) - MIN(energy))::numeric, 4) AS energy_range
+    FROM spotify GROUP BY album, artist
+)
+SELECT album, artist,
+       ROUND(max_energy::numeric,4), ROUND(min_energy::numeric,4), energy_range
+FROM energy_stats ORDER BY energy_range DESC;
+
+\echo ''
+\echo '============================================================'
+\echo '  QUERY 14: Tracks where energy_liveness ratio > 1.2'
+\echo '============================================================'
+SELECT track, artist,
+       ROUND(energy::numeric,4) AS energy,
+       ROUND(liveness::numeric,4) AS liveness,
+       ROUND(energy_liveness::numeric,4) AS energy_liveness_ratio
+FROM spotify
+WHERE energy_liveness > 1.2
+ORDER BY energy_liveness DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, energy, liveness, energy_liveness
+FROM spotify WHERE energy_liveness > 1.2 ORDER BY energy_liveness DESC;
+
 
