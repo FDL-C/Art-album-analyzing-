@@ -235,3 +235,42 @@ SELECT track, artist, energy, liveness, energy_liveness
 FROM spotify WHERE energy_liveness > 1.2 ORDER BY energy_liveness DESC;
 
 
+
+\echo '============================================================'
+\echo '  QUERY 15: Cumulative sum of likes ordered by views (WINDOW)'
+\echo '============================================================'
+SELECT
+    track,
+    artist,
+    views,
+    likes,
+    SUM(likes) OVER (ORDER BY views ASC
+                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                    ) AS cumulative_likes
+FROM spotify
+ORDER BY views ASC
+LIMIT 30;
+
+\echo ''
+\echo '--- Full cumulative sum (all 100 rows, last 10 shown) ---'
+SELECT track, artist, views, likes, cumulative_likes
+FROM (
+    SELECT
+        track, artist, views, likes,
+        SUM(likes) OVER (ORDER BY views ASC
+                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_likes,
+        ROW_NUMBER() OVER (ORDER BY views ASC) AS rn
+    FROM spotify
+) sub
+WHERE rn > 90
+ORDER BY rn;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, views, likes,
+       SUM(likes) OVER (ORDER BY views ASC
+                        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_likes
+FROM spotify
+ORDER BY views ASC;
+
