@@ -85,3 +85,59 @@ ORDER BY avg_danceability DESC;
 EXPLAIN ANALYZE
 SELECT album, artist, ROUND(AVG(danceability)::numeric,4) AS avg_danceability
 FROM spotify GROUP BY album, artist ORDER BY avg_danceability DESC;
+
+'============================================================'
+\echo '  QUERY 7: Top 5 tracks with highest energy'
+\echo '============================================================'
+SELECT track, artist, ROUND(energy::numeric,4) AS energy
+FROM spotify
+ORDER BY energy DESC
+LIMIT 5;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, energy FROM spotify ORDER BY energy DESC LIMIT 5;
+
+\echo ''
+\echo '============================================================'
+\echo '  QUERY 8: Tracks with official_video = TRUE (views & likes)'
+\echo '============================================================'
+SELECT track, artist, views, likes
+FROM spotify
+WHERE official_video = TRUE
+ORDER BY views DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, views, likes FROM spotify WHERE official_video = TRUE ORDER BY views DESC;
+
+
+============================================================'
+\echo '  QUERY 9: Total views per album'
+\echo '============================================================'
+SELECT album, artist, ROUND(SUM(views)::numeric,0) AS total_views
+FROM spotify
+GROUP BY album, artist
+ORDER BY total_views DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT album, artist, SUM(views) AS total_views FROM spotify GROUP BY album, artist ORDER BY total_views DESC;
+
+\echo ''
+\echo '============================================================'
+\echo '  QUERY 10: Tracks streamed more on Spotify than YouTube'
+\echo '============================================================'
+SELECT track, artist, most_played_on, stream
+FROM spotify
+WHERE most_played_on = 'Spotify'
+ORDER BY stream DESC;
+
+\echo ''
+\echo '--- EXPLAIN ANALYZE ---'
+EXPLAIN ANALYZE
+SELECT track, artist, most_played_on, stream FROM spotify WHERE most_played_on = 'Spotify' ORDER BY stream DESC;
+
